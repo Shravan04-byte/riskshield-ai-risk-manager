@@ -252,3 +252,6 @@ logs/*.jsonl
 # OS
 .DS_Store
 Thumbs.db
+data/case_store/
+data/creditcard.csv
+models/

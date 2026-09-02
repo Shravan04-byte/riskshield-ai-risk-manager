@@ -35,11 +35,11 @@ from explain import (
 )
 
 ALLOWED_ACTIONS = frozenset({"APPROVE", "REVIEW", "HOLD"})
-DEFAULT_GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
+DEFAULT_GROQ_MODEL = "openai/gpt-oss-20b"
 
 
 def create_llm_client(
-    model: str = DEFAULT_GROQ_MODEL,
+    model: str | None = None,
     api_key: str | None = None,
     temperature: float = 0.0,
 ) -> ChatGroq:
@@ -49,7 +49,9 @@ def create_llm_client(
         raise ValueError(
             "GROQ_API_KEY is not set. Copy .env.example to .env and add your key."
         )
-    return ChatGroq(model=model, temperature=temperature, groq_api_key=key)
+    # Read GROQ_MODEL at call time so load_dotenv(override=True) takes effect.
+    resolved_model = model or os.getenv("GROQ_MODEL", DEFAULT_GROQ_MODEL)
+    return ChatGroq(model=resolved_model, temperature=temperature, groq_api_key=key)
 
 
 def _call_llm(llm_client: BaseChatModel, system_prompt: str, user_prompt: str) -> str:
@@ -211,7 +213,7 @@ def log_decision(decision: dict[str, Any], log_path: str | Path = "logs/decision
 if __name__ == "__main__":
     import pprint
 
-    load_dotenv()
+    load_dotenv(override=True)
     project_root = Path(__file__).resolve().parents[1]
     data_path = project_root / "data" / "creditcard.csv"
     model_path = project_root / "models" / "fraud_xgb.joblib"

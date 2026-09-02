@@ -204,7 +204,8 @@ def _load_example_transactions(model, feature_cols: list[str], threshold: float)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    load_dotenv(PROJECT_ROOT / ".env")
+    # override=True so .env wins over a stale shell-exported GROQ_API_KEY / GROQ_MODEL.
+    load_dotenv(PROJECT_ROOT / ".env", override=True)
 
     print("[startup] Loading XGBoost model and config...")
     model, model_config = load_model(MODEL_PATH)
